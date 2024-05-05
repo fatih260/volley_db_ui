@@ -3,10 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jury</title>
+    <title>Jury Dashboard</title>
 </head>
 <body>
-    <h2>Jury</h2>
+    <h1>Jury Dashboard, Hi {{ username }}</h1>
+
+    <h2>Jury Statistics</h2>
+    <p>Average Rating: {{ average_rating }}</p>
+    <p>Total Rated Sessions: {{ count }}</p>
+
+
+    
+    <h2>Rate Match Sessions</h2>
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Session ID</th>
+                    <th>Team ID</th>
+                    <th>Stadium Name</th>
+                    <th>Time Slot</th>
+                    <th>Date</th>
+                    <th>Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in assigned_sessions %}
+                <tr>
+                    <td>{{ session.0 }}</td>
+                    <td>{{ session.1 }}</td>
+                    <td>{{ session.2 }}</td>
+                    <td>{{ session.3 }}</td>
+                    <td>{{ session.4 }}</td>
+                    <td><input type="float" name="ratings[]" min="1" max="5" placeholder="Rate"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" name="rate_sessions">Submit Ratings</button>
+    </form>
 
 </body>
 </html>

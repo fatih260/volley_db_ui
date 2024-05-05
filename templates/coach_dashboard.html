@@ -15,7 +15,7 @@
         {% endfor %}
     </ul>
 
-
+    <h1>Delete Match Session</h1>
     <form method="post">
         {% csrf_token %}
         <!-- Match session deletion form -->
@@ -23,6 +23,7 @@
         <button type="submit" name="delete_session">Delete Match Session</button>
     </form>
 
+    <h1>Add Match Session</h1>
     <form method="post">
         {% csrf_token %}
         <!-- Team ID input -->
@@ -50,6 +51,30 @@
         <input type="text" id="jury_surname" name="jury_surname">
 
         <button type="submit" name="add_match_session">Add Match Session</button>
+    </form>
+
+
+
+
+    <h1>Create Squad</h1>
+    <form method="post">
+        {% csrf_token %}
+        <h2>Player List</h2>
+        <ul>
+            {% for player_name, positions in player_positions.items %}
+                <li>
+                    <input type="checkbox" name="selected_players" value="{{ player_name }}">
+                    <label>{{ player_name }}</label>
+                    <select name="{{ player_name }}_position">
+                        <option value="">Select Position</option>
+                        {% for position in positions %}
+                            <option value="{{ position }}">{{ position }}</option>
+                        {% endfor %}
+                    </select>
+                </li>
+            {% endfor %}
+        </ul>
+        <button type="submit" name="create_squad">Submit</button>
     </form>
 
 </body>

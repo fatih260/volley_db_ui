@@ -3,10 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player</title>
+    <title>Player Dashboard</title>
 </head>
 <body>
-    <h2>Player</h2>
+    <h2>Welcome, {{ username }}</h2>
 
+    <h3>Your Teammates:</h3>
+    <ul>
+        {% for teammate in team_mates %}
+            <li>{{ teammate }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Average heigt of the players with which you have played most : {{ average_height }}</h3>
+    
+    
 </body>
 </html>
