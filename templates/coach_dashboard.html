@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, Coach {{ username }}, Team_id {{team_id}}</h2>
+
+    <h3>List of Stadiums</h3>
+    <ul>
+        {% for stadium in stadiums %}
+            <li>{{ stadium.0 }} - {{ stadium.1 }}</li>
+        {% endfor %}
+    </ul>
+
+
+    <form method="post">
+        {% csrf_token %}
+        <!-- Match session deletion form -->
+        <input type="text" name="session_id" placeholder="Enter session ID to delete">
+        <button type="submit" name="delete_session">Delete Match Session</button>
+    </form>
+
+    <form method="post">
+        {% csrf_token %}
+        <!-- Team ID input -->
+        <!-- team_id will be given-->
+        <label for="team_id">Team ID:</label>
+        <input type="text" id="team_id" name="team_id" value="{{ team_id }}" readonly>
+
+        <!-- Stadium info input -->
+        <label for="stadium_name">Stadium Name:</label>
+        <input type="text" id="stadium_name" name="stadium_name">
+
+        <!-- Date input -->
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date">
+
+        <!-- Time slot input -->
+        <label for="time_slot">Time Slot:</label>
+        <input type="number" id="time_slot" name="time_slot">
+
+        <!-- Assigned jury input -->
+        <label for="jury_name">Jury Name:</label>
+        <input type="text" id="jury_name" name="jury_name">
+
+        <label for="jury_surname">Jury Surname:</label>
+        <input type="text" id="jury_surname" name="jury_surname">
+
+        <button type="submit" name="add_match_session">Add Match Session</button>
+    </form>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Db admin</title>
+</head>
+<body>
+    <h2>Hi, Db admin {{username}}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <!-- Stadium update form  -->
+        
+        <input type="text" name="old_name" placeholder="Enter old stadium name">
+        <input type="text" name="new_name" placeholder="Enter new stadium name">
+        <button type="submit" name="update_stadium">Update Stadium</button>
+    </form>
+
+</body>
+
+</html>

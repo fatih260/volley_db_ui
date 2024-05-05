@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'db_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'volleydb',
+        'NAME': 'django_volley_db',
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'USER': 'root',
@@ -103,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'db_app.User'
+#AUTH_USER_MODEL = 'db_app.User'
 
 
 
