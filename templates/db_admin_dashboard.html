@@ -17,6 +17,96 @@
         <button type="submit" name="update_stadium">Update Stadium</button>
     </form>
 
-</body>
 
+    <h2>Add New User</h2>
+    <form method="post" id="add_user_form">
+        {% csrf_token %}
+        
+        <label for="user_type">Select User Type:</label>
+        <select name="user_type" id="user_type">
+            <option value="" selected disabled>Select User Type</option>
+            <option value="player">Player</option>
+            <option value="jury">Jury</option>
+            <option value="coach">Coach</option>
+        </select>
+
+        <!-- username, password, name, surname, date_of_birth will be common -->
+        <br>
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+        <br>
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name" required>
+        <br>
+        <label for="surname">Surname:</label>
+        <input type="text" name="surname" id="surname" required>
+        <br>
+        
+
+        <!-- Additional fields will be dynamically added here -->
+        <div id="additional_fields"></div>
+        <br>
+        <button type="submit" name="add_user">Add User</button>
+    </form>
+
+    
+
+    <script>
+        
+
+        document.getElementById('user_type').addEventListener('change', function() {
+            var userType = this.value;
+            var additionalFieldsDiv = document.getElementById('additional_fields');
+            additionalFieldsDiv.innerHTML = ''; // Clear existing fields
+
+            if (userType === 'player') {
+                
+
+                // height and weight will be specific to players
+                additionalFieldsDiv.innerHTML = `
+                    
+                    <label for="team">Select Team:</label>
+                    <select name="team" id="team">
+                        {% for team_id, team_name in teams %}
+                            <option value="{{ team_id }}"> {{team_id}} {{ team_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <br>
+
+                    <label for="position">Select Position:</label>
+                    <select name="position" id="position">
+                        {% for position_id, position_name in positions %}
+                            <option value="{{ position_id }}"> {{position_id}} {{ position_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <br>
+                    
+                    <label for="height">Height:</label>
+                    <input type="number" name="height" id="height" required>
+                    <br>
+                    <label for="weight">Weight:</label>
+                    <input type="number" name="weight" id="weight" required>
+                    <br>
+                    <label for="date_of_birth">Date of Birth:</label>
+                    <input type="date" name="date_of_birth" id="date_of_birth" required>
+                    <br>
+                    
+                    
+                    <!-- Add more fields specific to players -->
+                `;
+            } else if (userType === 'jury' || userType === 'coach') {
+                // nationality will be specific to jury and coach
+                additionalFieldsDiv.innerHTML = `
+                    <label for="nationality">Nationality:</label>
+                    <input type="text" name= "nationality" id="national" required>
+                    <br>
+                `;
+
+            } 
+        });
+    </script>
+</body>
 </html>

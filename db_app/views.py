@@ -14,6 +14,29 @@ mydb = mysql.connector.connect(
   password="2652",
   database="volleydb",
 )
+def get_stadiums():
+    print("get stadiums")
+    cursor = mydb.cursor()
+    query_stadium = "SELECT stadium_name, stadium_country FROM stadium"
+    cursor.execute(query_stadium)
+    stadiums = cursor.fetchall()
+    cursor.close()
+    print(stadiums)
+    return stadiums
+
+def get_teams():
+    cursor = mydb.cursor()
+    query_teams = "SELECT team_ID, team_name FROM team"
+    cursor.execute(query_teams)
+    teams = cursor.fetchall()
+    return teams
+
+def get_positions():
+    cursor = mydb.cursor()
+    query_positions = "SELECT position_ID, position_name FROM position"
+    cursor.execute(query_positions)
+    positions = cursor.fetchall()
+    return positions
 
 #from team_id return players and positions as a dictionary
 def player_position_from_team_id(team_id):
@@ -97,6 +120,9 @@ def login(request):
 
 def db_admin_dashboard(request):
     username = request.session.get('username')
+
+    teams = get_teams()
+    positions = get_positions()
     print("username: ", username)
     if request.method == 'POST' and 'update_stadium' in request.POST:
         
@@ -110,11 +136,70 @@ def db_admin_dashboard(request):
         query = "UPDATE matchsession SET stadium_name = %s WHERE stadium_name = %s"
         cursor.execute(query, (new_name, old_name))
         mydb.commit()
+        query_stadium = "UPDATE stadium SET stadium_name = %s WHERE stadium_name = %s"
+        cursor.execute(query_stadium, (new_name, old_name))
+        mydb.commit()
 
         return redirect('db_admin_dashboard')
+    
+    if request.method == 'POST' and 'add_user' in request.POST:
         
+        user_type = request.POST.get('user_type')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        name = request.POST.get('name')
+        surname = request.POST.get('surname')
+        
+        if user_type == 'player':
+            team_id = request.POST.get('team')
+            position_id = request.POST.get('position')
+            height = request.POST.get('height')
+            weight = request.POST.get('weight')
+            date_of_birth = request.POST.get('date_of_birth')
 
-    return render(request, 'db_admin_dashboard.html', {'username': username})
+            # Process adding a new player
+            # Insert the new player into the database
+            # You can use the provided information (username, password, name, surname, team_id, position_id, height, weight, date_of_birth) to insert into the players table
+
+            cursor = mydb.cursor()
+            query_player = "INSERT INTO player (username, password, name, surname, date_of_birth, height, weight) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(query_player, (username, password, name, surname, date_of_birth, height, weight))
+            mydb.commit()
+
+            # first get the last player_teams_id 
+            query_last_player_id = "SELECT player_teams_id FROM playerteams ORDER BY player_teams_id DESC LIMIT 1" 
+            cursor.execute(query_last_player_id)
+            last_player_id = cursor.fetchone()[0]
+
+            query_players_teams = "INSERT INTO playerteams (player_teams_id, username, team) VALUES (%s, %s, %s)"
+            cursor.execute(query_players_teams, (last_player_id+1, username, team_id))
+            mydb.commit()
+
+            #first get the last player_positions_id
+            query_last_player_position_id = "SELECT player_positions_id FROM playerpositions ORDER BY player_positions_id DESC LIMIT 1"
+            cursor.execute(query_last_player_position_id)
+            last_player_position_id = cursor.fetchone()[0]
+
+            query_player_positions = "INSERT INTO playerpositions (player_positions_id, username, position) VALUES (%s, %s, %s)"
+            cursor.execute(query_player_positions, (last_player_position_id+1, username, position_id))
+            mydb.commit()
+
+        elif user_type == 'jury' or user_type == 'coach':
+            nationality = request.POST.get('nationality')
+            cursor = mydb.cursor()
+            query_jury = "INSERT INTO jury (username, password, name, surname, nationality) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(query_jury, (username, password, name, surname, nationality))
+            mydb.commit()
+            # Process adding a new jury
+            # Insert the new jury into the database
+            # You can use the provided information (username, password, name, surname, nationality) to insert into the jury table
+            
+        # Redirect or render success message
+
+        return redirect('db_admin_dashboard')
+
+    print("positions: ", positions)
+    return render(request, 'db_admin_dashboard.html', {'username': username, 'teams': teams, 'positions': positions})
 
 
 
@@ -125,11 +210,10 @@ def coach_dashboard(request):
     query_for_team_id = "SELECT team_ID FROM team WHERE coach_username = %s"
     cursor.execute(query_for_team_id, (username,))
     team_id = cursor.fetchone()[0]
+    cursor.close()
 
     # get existing stadium names and countries
-    query_stadium = "SELECT stadium_name, stadium_country FROM stadium"
-    cursor.execute(query_stadium)
-    stadiums = cursor.fetchall()
+    stadiums = get_stadiums()
 
     player_positions = player_position_from_team_id(team_id)
 
@@ -204,6 +288,11 @@ def coach_dashboard(request):
     if request.method == 'POST' and 'create_squad' in request.POST:
         
         selected_players = request.POST.getlist('selected_players')  # Get list of selected player names
+
+        if len(selected_players) != 6:
+            error_message = "Please select exactly 6 players for the squad."
+            return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions, 'error_message': error_message})
+        
         player_positions = {}  # Dictionary to store selected player positions
 
         # Loop through selected players and extract their positions
