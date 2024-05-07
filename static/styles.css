@@ -14,17 +14,20 @@ body {
 }
 
 .ball_icon img {
-    width: 20%;
+    width: 100px;
     height: auto; 
     display: block; 
     margin: 0 auto; 
 }
 
-
 .header {
     text-align: center;
     margin-bottom: 30px;
     color: #163020;
+}
+
+.buttons {
+    text-align: center;
 }
 
 .btn {
@@ -35,6 +38,8 @@ body {
     text-decoration: none;
     border-radius: 5px;
     margin-bottom: 10px;
+    font-size: 16px;
+    border: none;
 }
 
 .btn:hover {
@@ -54,5 +59,55 @@ body {
     left: 50%; /* Center horizontally */
     transform: translateX(-50%); /* Center horizontally */
     width: 100%; /* Ensure full width */
+    font-size: 12px;
     color: #304D30;
+}
+
+.login-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.login-input {
+    width: 300px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.login-input label {
+    display: block;
+    text-align: left;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color:#163020;
+}
+
+.login-input input[type="text"],
+.login-input input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    color:#304D30;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-danger {
+    text-align: center;
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.alert-danger strong {
+    font-weight: bold;
 }

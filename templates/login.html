@@ -1,25 +1,53 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <h2>Login</h2>
-
-    {% if error_message %}
-        <div class="alert alert-danger">
-            <strong>{{ error_message }}</strong><br>
+    <div class="container">
+        <div class="ball_icon">
+            <img src="{% static 'volleyball.png' %}" alt="volleyball">
         </div>
-    {% endif %}
-    <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-        <button type="submit">Login</button>
-    </form>
+        <div class="header">
+            <h2>Login</h2>
+        </div>
+
+        {% if error_message %}
+            <div id="error-message" class="alert alert-danger">
+                <strong>{{ error_message }}</strong><br>
+            </div>
+        {% endif %}
+
+        <div class="login-container">
+            <div class="login-input">
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required><br>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required><br>
+                    <button type="submit" class="btn">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="credits">
+        <p>Volleyball Database Management System</p>
+    </div>
+
+    <script>
+        // Function to hide the error message after 5 seconds
+        setTimeout(function() {
+            var errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none';
+            }
+        }, 5000); // 5000 milliseconds = 5 seconds
+    </script>
 </body>
 </html>
