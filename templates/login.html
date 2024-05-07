@@ -8,11 +8,9 @@
 <body>
     <h2>Login</h2>
 
-    {% if messages %}
+    {% if error_message %}
         <div class="alert alert-danger">
-            {% for message in messages %}
-                <strong>{{ message }}</strong><br>
-            {% endfor %}
+            <strong>{{ error_message }}</strong><br>
         </div>
     {% endif %}
     <form method="post" action="{% url 'login' %}">
