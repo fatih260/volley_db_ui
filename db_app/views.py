@@ -67,6 +67,9 @@ def player_position_from_team_id(team_id):
         players_and_positions[player_name] = positions
     return players_and_positions
 
+def home(request):
+    return render(request, 'home.html')
+
 
 def login(request):
     if request.method == 'POST':

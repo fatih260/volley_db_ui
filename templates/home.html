@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volleyball Database Management</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="ball_icon">
+            <img src="{% static 'volleyball.png' %}" alt="volleyball">
+        </div>
+        <div class="header">
+            <h1>Volleyball Database Management System</h1>
+        </div>
+        <div class="summary">
+            <p>Welcome to the Volleyball Database Management System, developed in the scope of CMPE321 course. This system allows you to manage data related to players, coaches, and jury members involved in volleyball.</p>
+            <p>Use the buttons below to navigate:</p>
+        </div>
+        <div class="buttons">
+            <a href="/login" class="btn">Login</a><br>
+        </div>
+        <div class="credits">
+            <p>Designed and Developed by Ceylin Gebes & Fatih Demir.</p>
+        </div>
+    </div>
+</body>
+</html>
