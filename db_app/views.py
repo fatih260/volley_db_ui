@@ -29,6 +29,7 @@ def get_teams():
     query_teams = "SELECT team_ID, team_name FROM team"
     cursor.execute(query_teams)
     teams = cursor.fetchall()
+    cursor.close()
     return teams
 
 def get_positions():
@@ -36,6 +37,7 @@ def get_positions():
     query_positions = "SELECT position_ID, position_name FROM position"
     cursor.execute(query_positions)
     positions = cursor.fetchall()
+    cursor.close()
     return positions
 
 #from team_id return players and positions as a dictionary
@@ -48,8 +50,11 @@ def player_position_from_team_id(team_id):
     WHERE playerteams.team = %s"""
     cursor.execute(inner_join_query, (team_id,))
     players = cursor.fetchall()
+    cursor.close()
+
     players_and_positions = {}
     for player in players:
+        cursor = mydb.cursor()
         player_name = player[0]
         query = """SELECT playerpositions.position
     FROM player 
@@ -57,6 +62,7 @@ def player_position_from_team_id(team_id):
     WHERE player.name = %s"""
         cursor.execute(query, (player_name,))
         positions = cursor.fetchall()
+        cursor.close()
         positions = [position[0] for position in positions]
         players_and_positions[player_name] = positions
     return players_and_positions
@@ -75,35 +81,39 @@ def login(request):
         query = "SELECT * FROM dbmanager WHERE username = %s AND password = %s"
         cursor.execute(query, (username, password))
         user = cursor.fetchone()
+        cursor.close()
 
         if user:
             # Redirect to a dashboard or homepage
             return redirect('db_admin_dashboard')
         
-
+        cursor = mydb.cursor()
         query = "SELECT * FROM player WHERE username = %s AND password = %s"
         cursor.execute(query, (username, password))
         user = cursor.fetchone()
+        cursor.close()
 
         if user:
             # Redirect to a dashboard or homepage
             return redirect('player_dashboard')
         
 
-        
+        cursor = mydb.cursor()
         query = "SELECT * FROM coach WHERE username = %s AND password = %s"
         cursor.execute(query, (username, password))
         user = cursor.fetchone()
+        cursor.close()
 
         if user:
             # Redirect to a dashboard or homepage
             return redirect('coach_dashboard')
         
 
-        
+        cursor = mydb.cursor()        
         query = "SELECT * FROM jury WHERE username = %s AND password = %s"
         cursor.execute(query, (username, password))
         user = cursor.fetchone()
+        cursor.close()
 
         if user:
             # Redirect to a dashboard or homepage
@@ -136,9 +146,13 @@ def db_admin_dashboard(request):
         query = "UPDATE matchsession SET stadium_name = %s WHERE stadium_name = %s"
         cursor.execute(query, (new_name, old_name))
         mydb.commit()
+        cursor.close()
+
+        cursor = mydb.cursor()
         query_stadium = "UPDATE stadium SET stadium_name = %s WHERE stadium_name = %s"
         cursor.execute(query_stadium, (new_name, old_name))
         mydb.commit()
+        cursor.close()
 
         return redirect('db_admin_dashboard')
     
@@ -165,24 +179,35 @@ def db_admin_dashboard(request):
             query_player = "INSERT INTO player (username, password, name, surname, date_of_birth, height, weight) VALUES (%s, %s, %s, %s, %s, %s, %s)"
             cursor.execute(query_player, (username, password, name, surname, date_of_birth, height, weight))
             mydb.commit()
+            cursor.close()
 
+            cursor = mydb.cursor()
             # first get the last player_teams_id 
             query_last_player_id = "SELECT player_teams_id FROM playerteams ORDER BY player_teams_id DESC LIMIT 1" 
             cursor.execute(query_last_player_id)
             last_player_id = cursor.fetchone()[0]
+            cursor.close()
 
+            cursor = mydb.cursor()
             query_players_teams = "INSERT INTO playerteams (player_teams_id, username, team) VALUES (%s, %s, %s)"
             cursor.execute(query_players_teams, (last_player_id+1, username, team_id))
             mydb.commit()
+            cursor.close()
+
 
             #first get the last player_positions_id
+            cursor = mydb.cursor()
             query_last_player_position_id = "SELECT player_positions_id FROM playerpositions ORDER BY player_positions_id DESC LIMIT 1"
             cursor.execute(query_last_player_position_id)
             last_player_position_id = cursor.fetchone()[0]
+            cursor.close()
 
+            cursor = mydb.cursor()
             query_player_positions = "INSERT INTO playerpositions (player_positions_id, username, position) VALUES (%s, %s, %s)"
             cursor.execute(query_player_positions, (last_player_position_id+1, username, position_id))
             mydb.commit()
+            cursor.close()
+
 
         elif user_type == 'jury' or user_type == 'coach':
             nationality = request.POST.get('nationality')
@@ -190,9 +215,7 @@ def db_admin_dashboard(request):
             query_jury = "INSERT INTO jury (username, password, name, surname, nationality) VALUES (%s, %s, %s, %s, %s)"
             cursor.execute(query_jury, (username, password, name, surname, nationality))
             mydb.commit()
-            # Process adding a new jury
-            # Insert the new jury into the database
-            # You can use the provided information (username, password, name, surname, nationality) to insert into the jury table
+            cursor.close()
             
         # Redirect or render success message
 
@@ -228,6 +251,8 @@ def coach_dashboard(request):
         
         # Commit the changes to the database
         mydb.commit()
+
+        cursor.close()
         
         # Redirect back to the coach dashboard
         return redirect('coach_dashboard')
@@ -249,14 +274,17 @@ def coach_dashboard(request):
         query = "SELECT stadium_id, stadium_country FROM stadium WHERE stadium_name = %s"
         cursor.execute(query, (stadium_name,))
         stadium_data = cursor.fetchone()
+        cursor.close()
         stadium_id = stadium_data[0]
         stadium_country = stadium_data[1]
 
 
         # Query to get the session_ID of the last row
+        cursor = mydb.cursor()
         query_last_session_id = "SELECT session_ID FROM matchsession ORDER BY session_ID DESC LIMIT 1"
         cursor.execute(query_last_session_id)
         last_session_id = cursor.fetchone()
+        cursor.close()
 
         # Increment the last session ID by one
         if last_session_id:
@@ -267,8 +295,11 @@ def coach_dashboard(request):
 
         # Query to get the username of the jury
         query_jury_username = "SELECT username FROM jury WHERE name = %s AND surname = %s"
+
+        cursor = mydb.cursor()
         cursor.execute(query_jury_username, (jury_name, jury_surname))
         jury_username = cursor.fetchone()[0]
+        cursor.close()
 
         # Extract day, month, and year from the date string
         year, month, day = date.split('-')
@@ -278,8 +309,10 @@ def coach_dashboard(request):
 
         # Insert the new match session into the database
         query = "INSERT INTO matchsession (session_ID, team_ID, stadium_ID, stadium_name, stadium_country, time_slot, date, assigned_jury_username, rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NULL)"
+        cursor = mydb.cursor()
         cursor.execute(query, (session_id, team_id, stadium_id, stadium_name, stadium_country, time_slot, formatted_date, jury_username))
         mydb.commit()
+        cursor.close()
 
         
         # Redirect back to the coach dashboard
@@ -308,8 +341,10 @@ def coach_dashboard(request):
 
         # Query to get the squad_ID of the last row
         query_last_squad_id = "SELECT squad_ID FROM sessionsquads ORDER BY squad_ID DESC LIMIT 1"
+        cursor = mydb.cursor()
         cursor.execute(query_last_squad_id)
         last_squad_id = cursor.fetchone()
+        cursor.close()
 
         # Increment the last squad_ID by one
         if last_squad_id:
@@ -321,22 +356,27 @@ def coach_dashboard(request):
         
         # Query to get the session_ID of the last row
         query_last_session_id = "SELECT session_ID FROM matchsession WHERE team_ID = %s ORDER BY session_ID DESC LIMIT 1"
+        cursor = mydb.cursor()
         cursor.execute(query_last_session_id, (team_id,))
         last_session_id = cursor.fetchone()[0]
+        cursor.close()
 
         # Insert the new squad into the database
         for player_name, position in player_positions.items():
 
             # get player username from player name
+            cursor = mydb.cursor()
             query = "SELECT username FROM player WHERE name = %s"
             cursor.execute(query, (player_name,))
             player_username = cursor.fetchone()[0]
+            cursor.close()
 
+            cursor = mydb.cursor()
             squad_id += 1
             query = "INSERT INTO sessionsquads (squad_ID, session_ID, played_player_username, position_ID) VALUES (%s, %s, %s, %s)"
             cursor.execute(query, (squad_id, last_session_id, player_username, position))
             mydb.commit()
-            
+            cursor.close()
 
         
         
@@ -362,6 +402,7 @@ def jury_dashboard(request):
     data = cursor.fetchone()
     average_rating = data[0]
     count = data[1]
+    cursor.close()
 
 
     # Get the current date
@@ -371,8 +412,10 @@ def jury_dashboard(request):
     query_assigned_sessions = """SELECT session_ID, team_ID, stadium_name, time_slot, date
     FROM matchsession 
     WHERE assigned_jury_username = %s AND rating IS NULL AND STR_TO_DATE(date, '%d.%m.%Y') < STR_TO_DATE(%s, '%d.%m.%Y')"""
+    cursor = mydb.cursor()
     cursor.execute(query_assigned_sessions, (username, reformatted_date,))
     assigned_sessions = cursor.fetchall()
+    cursor.close()
     assigned_sessions = [list(session) for session in assigned_sessions]
     session_ids = [session[0] for session in assigned_sessions]
     print(assigned_sessions)
@@ -387,8 +430,10 @@ def jury_dashboard(request):
             if rating:
                 # Insert or update the rating in the database for the corresponding session ID
                 query_update_rating = "UPDATE matchsession SET rating = %s WHERE session_ID = %s"
+                cursor = mydb.cursor()
                 cursor.execute(query_update_rating, (rating, session_id))
                 mydb.commit()
+                cursor.close()
 
         # Redirect back to the jury dashboard
         return redirect('jury_dashboard')
@@ -413,6 +458,7 @@ def player_dashboard(request):
     cursor = mydb.cursor()
     cursor.execute(team_mates_query, (username, username))
     team_mates = cursor.fetchall()
+    cursor.close()
     team_mates = [f"{team_mate[0]} {team_mate[1]}" for team_mate in team_mates]
 
     most_played_player_height_query = """SELECT AVG(player.height) AS average_height
@@ -443,9 +489,10 @@ def player_dashboard(request):
     ) AS most_played_players
     INNER JOIN player ON most_played_players.played_player_username = player.username
     """
-
+    cursor = mydb.cursor()
     cursor.execute(most_played_player_height_query)
     data = cursor.fetchone()
+    cursor.close()
     average_height = data[0]
 
 
