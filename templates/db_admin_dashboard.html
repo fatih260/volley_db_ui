@@ -1,58 +1,65 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Db admin</title>
+    <title>Database Admin</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <h2>Hi, Db admin {{username}}</h2>
+    <div class="container">
+        <div class="icon">
+            <img src="{% static 'admin_icon.png' %}" alt="admin_icon">
+        </div>
+        <div class="header">
+            <h2>Welcome back, admin {{username}}!</h2>
+        </div>
 
-    <form method="post">
-        {% csrf_token %}
-        <!-- Stadium update form  -->
-        
-        <input type="text" name="old_name" placeholder="Enter old stadium name">
-        <input type="text" name="new_name" placeholder="Enter new stadium name">
-        <button type="submit" name="update_stadium">Update Stadium</button>
-    </form>
+        <form method="post" class="login-input">
+            {% csrf_token %}
+            <!-- Stadium update form  -->
+            <label for="old_name">Enter old stadium name:</label>
+            <input type="text" name="old_name" id="old_name" required>
+            <label for="new_name">Enter new stadium name:</label>
+            <input type="text" name="new_name" id="new_name" required>
+            <button type="submit" name="update_stadium" class="btn">Update Stadium</button>
+        </form>
+        <br>
+        <form method="post" id="add_user_form" class="login-input">
+            {% csrf_token %}
+            
+            <label for="user_type">Select User Type:</label>
+            <select name="user_type" id="user_type" class="dropdown">
+                <option value="" selected disabled>Select User Type</option>
+                <option value="player">Player</option>
+                <option value="jury">Jury</option>
+                <option value="coach">Coach</option>
+            </select>
 
+            <!-- username, password, name, surname, date_of_birth will be common -->
+            <br>
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required>
+            <br>
+            <label for="name">Name:</label>
+            <input type="text" name="name" id="name" required>
+            <br>
+            <label for="surname">Surname:</label>
+            <input type="text" name="surname" id="surname" required>
+            <br>
+            
 
-    <h2>Add New User</h2>
-    <form method="post" id="add_user_form">
-        {% csrf_token %}
-        
-        <label for="user_type">Select User Type:</label>
-        <select name="user_type" id="user_type">
-            <option value="" selected disabled>Select User Type</option>
-            <option value="player">Player</option>
-            <option value="jury">Jury</option>
-            <option value="coach">Coach</option>
-        </select>
+            <!-- Additional fields will be dynamically added here -->
+            <div id="additional_fields"></div>
+            <br>
+            <button type="submit" name="add_user" class="btn">Add User</button>
+        </form>
 
-        <!-- username, password, name, surname, date_of_birth will be common -->
-        <br>
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" required>
-        <br>
-        <label for="name">Name:</label>
-        <input type="text" name="name" id="name" required>
-        <br>
-        <label for="surname">Surname:</label>
-        <input type="text" name="surname" id="surname" required>
-        <br>
-        
-
-        <!-- Additional fields will be dynamically added here -->
-        <div id="additional_fields"></div>
-        <br>
-        <button type="submit" name="add_user">Add User</button>
-    </form>
-
-    
+    </div>
 
     <script>
         

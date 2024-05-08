@@ -13,7 +13,7 @@ body {
     padding: 20px;
 }
 
-.ball_icon img {
+.icon img {
     width: 100px;
     height: auto; 
     display: block; 
@@ -110,4 +110,38 @@ body {
 
 .alert-danger strong {
     font-weight: bold;
+}
+
+/* Dropdown container */
+.dropdown {
+    width: 100%; /* Set width to match input field width */
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    background-color: #fff;
+    color: #304D30;
+    margin-bottom: 10px;
+    position: relative; /* Ensure relative positioning for child elements */
+}
+
+/* Dropdown select element */
+.dropdown select {
+    width: calc(100% - 20px); /* Adjust width to match input field width */
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #fff;
+    color: #304D30;
+}
+
+/* Dropdown options style */
+.dropdown select option {
+    background-color: #EEF0E5;
+    color: #304D30;
+}
+
+/* Dropdown hover effect */
+.dropdown select option:hover {
+    background-color: #B6C4B6;
 }
