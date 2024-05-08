@@ -13,6 +13,32 @@ body {
     padding: 20px;
 }
 
+.info-section {
+    width: calc(50% - 10px);
+    padding: 20px;
+    background-color: #B6C4B6;
+    border-radius: 5px;
+    box-sizing: border-box;
+    float: left;
+    margin-right: 20px; /* Increased margin for better separation */
+    margin-bottom: 20px; /* Added margin at the bottom */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+.info-section:last-child {
+    margin-right: 0;
+}
+
+.info-section h3 {
+    margin-bottom: 10px;
+    color: #163020; /* Match your header color */
+}
+
+.info-section ul {
+    padding-left: 20px;
+    color: #304D30; /* Match your text color */
+}
+
 .icon img {
     width: 100px;
     height: auto; 
