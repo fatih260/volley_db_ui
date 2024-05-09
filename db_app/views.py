@@ -1,4 +1,7 @@
+from django.contrib.auth.decorators import login_required
+
 from django.shortcuts import render
+from mysql.connector import Error as MySQLError
 
 # Create your views here.
 from django.shortcuts import render, redirect
@@ -13,6 +16,7 @@ mydb = mysql.connector.connect(
   user="root",
   password="2652",
   database="volleydb",
+  buffered = True
 )
 def get_stadiums():
     print("get stadiums")
@@ -39,6 +43,14 @@ def get_positions():
     positions = cursor.fetchall()
     cursor.close()
     return positions
+
+def get_jury_names_surnames():
+    cursor = mydb.cursor()
+    query_jury = "SELECT name, surname FROM jury"
+    cursor.execute(query_jury)
+    jury = cursor.fetchall()
+    cursor.close()
+    return jury
 
 #from team_id return players and positions as a dictionary
 def player_position_from_team_id(team_id):
@@ -229,7 +241,6 @@ def db_admin_dashboard(request):
 
 
 
-
 def coach_dashboard(request):
     username = request.session.get('username')
     cursor = mydb.cursor()
@@ -239,7 +250,10 @@ def coach_dashboard(request):
     cursor.close()
 
     # get existing stadium names and countries
-    stadiums = get_stadiums()
+    stadiums = get_stadiums()# [f"{stadium[0]}" for stadium in  get_stadiums()]
+
+    jury_names_surnames = get_jury_names_surnames()
+    jury_names_surnames_list = [f"{name} {surname}" for name, surname in jury_names_surnames]
 
     player_positions = player_position_from_team_id(team_id)
 
@@ -266,16 +280,18 @@ def coach_dashboard(request):
         # Process match session form
         
         stadium_name = request.POST.get('stadium_name')
+        print("stadium_name: ", stadium_name)
         date = request.POST.get('date')
         time_slot = request.POST.get('time_slot')
-        jury_name = request.POST.get('jury_name')
-        jury_surname = request.POST.get('jury_surname')
+        jury_name_surname = request.POST.get('jury_name_surname')
+        jury_name = jury_name_surname.split()[0]
+        jury_surname = jury_name_surname.split()[1]
 
         cursor = mydb.cursor()
 
         # first get stadium id and country from stadium name
-        query = "SELECT stadium_id, stadium_country FROM stadium WHERE stadium_name = %s"
-        cursor.execute(query, (stadium_name,))
+        query_stadium_id_country = "SELECT stadium_id, stadium_country FROM stadium WHERE stadium_name = %s"
+        cursor.execute(query_stadium_id_country, (stadium_name,))
         stadium_data = cursor.fetchone()
         cursor.close()
         stadium_id = stadium_data[0]
@@ -309,14 +325,20 @@ def coach_dashboard(request):
         # Reformat the date string as DD.MM.YYYY
         formatted_date = f"{day}.{month}.{year}"
 
-
         # Insert the new match session into the database
-        query = "INSERT INTO matchsession (session_ID, team_ID, stadium_ID, stadium_name, stadium_country, time_slot, date, assigned_jury_username, rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NULL)"
+        query_add_match_session = "INSERT INTO matchsession (session_ID, team_ID, stadium_ID, stadium_name, stadium_country, time_slot, date, assigned_jury_username, rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NULL)"
         cursor = mydb.cursor()
-        cursor.execute(query, (session_id, team_id, stadium_id, stadium_name, stadium_country, time_slot, formatted_date, jury_username))
-        mydb.commit()
-        cursor.close()
-
+        try:
+            cursor.execute(query_add_match_session, (session_id, team_id, stadium_id, stadium_name, stadium_country, time_slot, formatted_date, jury_username))
+            mydb.commit()
+            cursor.close()
+        # Your existing code...
+        except MySQLError as e:
+            cursor.close()
+            error_message_os = "Cannot insert. Overlapping sessions detected."
+            return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions, 'jury_names_surnames': jury_names_surnames_list, 'error_message_os': error_message_os})
+        
+        
         
         # Redirect back to the coach dashboard
         return redirect('coach_dashboard')    
@@ -327,19 +349,18 @@ def coach_dashboard(request):
 
         if len(selected_players) != 6:
             error_message = "Please select exactly 6 players for the squad."
-            return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions, 'error_message': error_message})
+            return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions, 'jury_names_surnames': jury_names_surnames_list , 'error_message': error_message})
         
-        player_positions = {}  # Dictionary to store selected player positions
+        get_player_positions = {}  # Dictionary to store selected player positions
 
         # Loop through selected players and extract their positions
         for player_name in selected_players:
             position = request.POST.get(f'{player_name}_position')  # Get selected position for the player
             if position:
-                player_positions[player_name] = position
-
-        # Now you have a dictionary of selected player positions
-
-        
+                get_player_positions[player_name] = position
+            else:
+                error_message = "Please select a position for each player."
+                return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions, 'jury_names_surnames': jury_names_surnames_list, 'error_message': error_message})
 
 
         # Query to get the squad_ID of the last row
@@ -349,7 +370,7 @@ def coach_dashboard(request):
         last_squad_id = cursor.fetchone()
         cursor.close()
 
-        # Increment the last squad_ID by one
+        # Get the last squad ID
         if last_squad_id:
             squad_id = last_squad_id[0]
         else:
@@ -365,21 +386,31 @@ def coach_dashboard(request):
         cursor.close()
 
         # Insert the new squad into the database
-        for player_name, position in player_positions.items():
+        for player_name, position in get_player_positions.items():
 
             # get player username from player name
             cursor = mydb.cursor()
-            query = "SELECT username FROM player WHERE name = %s"
-            cursor.execute(query, (player_name,))
+            query_player_username = "SELECT username FROM player WHERE name = %s"
+            cursor.execute(query_player_username, (player_name,))
             player_username = cursor.fetchone()[0]
             cursor.close()
 
             cursor = mydb.cursor()
             squad_id += 1
-            query = "INSERT INTO sessionsquads (squad_ID, session_ID, played_player_username, position_ID) VALUES (%s, %s, %s, %s)"
-            cursor.execute(query, (squad_id, last_session_id, player_username, position))
-            mydb.commit()
-            cursor.close()
+            query_add_session_squad = "INSERT INTO sessionsquads (squad_ID, session_ID, played_player_username, position_ID) VALUES (%s, %s, %s, %s)"    
+            try:
+                cursor.execute(query_add_session_squad, (squad_id, last_session_id, player_username, position))
+                mydb.commit()
+                cursor.close()
+            except MySQLError as e:
+                cursor.close()
+                error_message_tc = f"Cannot insert. Player {player_username} has a time conflict"
+                query_delete_squad = "DELETE FROM sessionsquads WHERE session_ID = %s"
+                cursor = mydb.cursor()
+                cursor.execute(query_delete_squad, (last_session_id,))
+                mydb.commit()
+                cursor.close()
+                return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions, 'jury_names_surnames': jury_names_surnames_list, 'error_message_tc': error_message_tc})
 
         
         
@@ -387,7 +418,7 @@ def coach_dashboard(request):
         return redirect('coach_dashboard')  # Redirect to the same page after processing the data
 
      
-    return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions})
+    return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions, 'jury_names_surnames': jury_names_surnames_list})
 
 def jury_dashboard(request):
     username = request.session.get('username')
