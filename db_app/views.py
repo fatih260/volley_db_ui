@@ -30,7 +30,7 @@ def get_stadiums():
 
 def get_teams():
     cursor = mydb.cursor()
-    query_teams = "SELECT team_ID, team_name FROM team"
+    query_teams = "SELECT team_ID, team_name FROM team WHERE STR_TO_DATE(contract_finish, '%d.%m.%Y') > CURDATE() AND STR_TO_DATE(contract_start, '%d.%m.%Y') < CURDATE()"
     cursor.execute(query_teams)
     teams = cursor.fetchall()
     cursor.close()
@@ -244,13 +244,20 @@ def db_admin_dashboard(request):
 def coach_dashboard(request):
     username = request.session.get('username')
     cursor = mydb.cursor()
-    query_for_team_id = "SELECT team_ID FROM team WHERE coach_username = %s"
+    query_for_team_id = """
+    SELECT team_ID FROM team 
+    WHERE coach_username = %s AND STR_TO_DATE(contract_finish, '%d.%m.%Y') > CURDATE() AND STR_TO_DATE(contract_start, '%d.%m.%Y') < CURDATE()
+    """
     cursor.execute(query_for_team_id, (username,))
-    team_id = cursor.fetchone()[0]
+    row = cursor.fetchone()
+    try:
+        team_id = row[0]
+    except:
+        team_id = None
     cursor.close()
 
     # get existing stadium names and countries
-    stadiums = get_stadiums()# [f"{stadium[0]}" for stadium in  get_stadiums()]
+    stadiums = get_stadiums()
 
     jury_names_surnames = get_jury_names_surnames()
     jury_names_surnames_list = [f"{name} {surname}" for name, surname in jury_names_surnames]
@@ -276,6 +283,9 @@ def coach_dashboard(request):
 
     if request.method == 'POST' and 'add_match_session' in request.POST:
 
+        if team_id is None:
+            error_message = "You do not have an active team. You cannot add a match."
+            return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions, 'jury_names_surnames': jury_names_surnames_list, 'error_message_os': error_message})
 
         # Process match session form
         
