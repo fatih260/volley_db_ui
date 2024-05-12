@@ -20,9 +20,11 @@ body {
     border-radius: 5px;
     box-sizing: border-box;
     float: left;
+    margin-left: 20px;
     margin-right: 20px; /* Increased margin for better separation */
     margin-bottom: 20px; /* Added margin at the bottom */
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+    display: inline-block;
 }
 
 .info-section:last-child {
