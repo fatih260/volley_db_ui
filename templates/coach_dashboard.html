@@ -39,7 +39,7 @@
             {% if error_message_os %}
                 <p class="alert alert-danger">{{ error_message_os }}</p>
             {% endif %}
-            {% if team_id %}
+            {% if team_id is not None %}
                 <form method="post">
                     {% csrf_token %}
                     <div class="form-group">
