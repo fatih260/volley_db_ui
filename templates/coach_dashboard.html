@@ -1,99 +1,107 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coach Dashboard</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <h2>Welcome, Coach {{ username }}, Team_id {{team_id}}</h2>
+    <div class="container">
+        <div class="icon">
+            <img src="{% static 'coach_icon.png' %}" alt="coach_icon">
+        </div>
+        <div class="header">
+            <h2>Welcome back, Coach {{ username }}, Team_id {{team_id}}</h2>
+        </div>
 
-    <h3>List of Stadiums</h3>
-    <ul>
-        {% for stadium in stadiums %}
-            <li>{{ stadium.0 }} - {{ stadium.1 }}</li>
-        {% endfor %}
-    </ul>
+        <div class="info-section">
+            <h3>List of Stadiums</h3>
+            <ul>
+                {% for stadium in stadiums %}
+                    <li>{{ stadium.0 }} - {{ stadium.1 }}</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-    <h1>Delete Match Session</h1>
-    <form method="post">
-        {% csrf_token %}
-        <!-- Match session deletion form -->
-        <input type="text" name="session_id" placeholder="Enter session ID to delete">
-        <button type="submit" name="delete_session">Delete Match Session</button>
-    </form>
+        <div class="info-section">
+            <h3>Delete Match Session</h3>
+            <form method="post">
+                {% csrf_token %}
+                <input type="text" name="session_id" placeholder="Enter session ID to delete">
+                <button type="submit" name="delete_session" class="btn">Delete Match Session</button>
+            </form>
+        </div>
 
-    <h1>Add Match Session</h1>
-    {% if error_message_os %}
-        <p style="color: red;">{{ error_message_os }}</p>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        <!-- Team ID input -->
-        <!-- team_id will be given-->
-        <label for="team_id">Team ID:</label>
-        <input type="text" id="team_id" name="team_id" value="{{ team_id }}" readonly>
-    
-        <!-- Stadium info input -->
-        <label for="stadium_name">Stadium Name:</label>
-        <select id="stadium_name" name="stadium_name">
-            {% for stadium in stadiums %}
-                <option value="{{ stadium.0 }}">{{ stadium.0 }}</option>
-            {% endfor %}
-        </select>
-    
-        <!-- Date input -->
-        <label for="date">Date:</label>
-        <input type="date" id="date" name="date">
-    
-        <!-- Time slot input -->
-        <label for="time_slot">Time Slot:</label>
-        <select id="time_slot" name="time_slot">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-        </select>
-    
-        <!-- Assigned jury input -->
-        <label for="jury_name_surname">Jury Name Surname:</label>
-        <select id="jury_name_surname" name="jury_name_surname">
-            {% for jury in jury_names_surnames %}
-                <option value="{{ jury }}">{{ jury }}</option>
-            {% endfor %}
-        </select>
-    
-        <button type="submit" name="add_match_session">Add Match Session</button>
-    </form>
+        <div class="info-section">
+            <h3>Add Match Session</h3>
+            {% if error_message_os %}
+                <p class="alert alert-danger">{{ error_message_os }}</p>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <label for="team_id">Team ID:</label>
+                <input type="text" id="team_id" name="team_id" value="{{ team_id }}" readonly>
+                
+                <label for="stadium_name">Stadium Name:</label>
+                <select id="stadium_name" name="stadium_name" class="dropdown">
+                    {% for stadium in stadiums %}
+                        <option value="{{ stadium.0 }}">{{ stadium.0 }}</option>
+                    {% endfor %}
+                </select>
+                
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" class="dropdown">
+                
+                <label for="time_slot">Time Slot:</label>
+                <select id="time_slot" name="time_slot" class="dropdown">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+                
+                <label for="jury_name_surname">Jury Name Surname:</label>
+                <select id="jury_name_surname" name="jury_name_surname" class="dropdown">
+                    {% for jury in jury_names_surnames %}
+                        <option value="{{ jury }}">{{ jury }}</option>
+                    {% endfor %}
+                </select>
+                
+                <button type="submit" name="add_match_session" class="btn">Add Match Session</button>
+            </form>
+        </div>
 
+        <div class="info-section">
+            <h3>Create Squad</h3>
+            {% if error_message %}
+                <p class="alert alert-danger">{{ error_message }}</p>
+            {% endif %}
 
-    <h1>Create Squad</h1>
-    {% if error_message %}
-        <p style="color: red;">{{ error_message }}</p>
-    {% endif %}
-
-    {% if error_message_tc %}
-        <p style="color: red;">{{ error_message_tc }}</p>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        <h2>Player List</h2>
-        <ul>
-            {% for player_name, positions in player_positions.items %}
-                <li>
-                    <input type="checkbox" name="selected_players" value="{{ player_name }}">
-                    <label>{{ player_name }}</label>
-                    <select name="{{ player_name }}_position">
-                        <option value="">Select Position</option>
-                        {% for position in positions %}
-                            <option value="{{ position }}">{{ position }}</option>
-                        {% endfor %}
-                    </select>
-                </li>
-            {% endfor %}
-        </ul>
-        <button type="submit" name="create_squad">Submit</button>
-    </form>
-
+            {% if error_message_tc %}
+                <p class="alert alert-danger">{{ error_message_tc }}</p>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <h4>Player List</h4>
+                <ul>
+                    {% for player_name, positions in player_positions.items %}
+                        <li>
+                            <input type="checkbox" name="selected_players" value="{{ player_name }}">
+                            <label>{{ player_name }}</label>
+                            <select name="{{ player_name }}_position" class="dropdown">
+                                <option value="">Select Position</option>
+                                {% for position in positions %}
+                                    <option value="{{ position }}">{{ position }}</option>
+                                {% endfor %}
+                            </select>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <button type="submit" name="create_squad" class="btn">Submit</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
