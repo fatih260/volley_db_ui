@@ -34,12 +34,15 @@
             </form>
         </div>
 
-    <h1>Add Match Session</h1>
-    {% if error_message_os %}
-        <p style="color: red;">{{ error_message_os }}</p>
-    {% endif %}
+        <h1>Add Match Session</h1>
+        {% if error_message_os %}
+            <p style="color: red;">{{ error_message_os }}</p>
+        {% endif %}
 
-    {% if team_id %}
+        {% if error_message_dp %}
+            <p style="color: red;">{{ error_message_dp }}</p>
+        {% endif %}
+
         <form method="post">
             {% csrf_token %}
             <!-- Team ID input -->
@@ -78,9 +81,7 @@
         
             <button type="submit" name="add_match_session">Add Match Session</button>
         </form>
-    {% else %}
-        <p>You do not have an active team.</p>
-    {% endif %}
+
 
 
         <div class="info-section">

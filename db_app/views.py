@@ -7,8 +7,11 @@ from mysql.connector import Error as MySQLError
 from django.shortcuts import render, redirect
 
 import mysql.connector
-from datetime import date
+from datetime import date, datetime
 
+def convert_date(date_str):
+    # Convert string date in format dd.mm.yyyy to datetime object
+    return datetime.strptime(date_str, '%d.%m.%Y')
 
 #Connect with the precise info
 mydb = mysql.connector.connect(
@@ -245,15 +248,16 @@ def coach_dashboard(request):
     username = request.session.get('username')
     cursor = mydb.cursor()
     query_for_team_id = """
-    SELECT team_ID FROM team 
-    WHERE coach_username = %s AND STR_TO_DATE(contract_finish, '%d.%m.%Y') > CURDATE() AND STR_TO_DATE(contract_start, '%d.%m.%Y') < CURDATE()
-    """
+    SELECT team_ID, contract_start, contract_finish 
+    FROM team 
+    WHERE coach_username = %s
+    """ 
+    ## AND STR_TO_DATE(contract_finish, '%d.%m.%Y') > CURDATE() AND STR_TO_DATE(contract_start, '%d.%m.%Y') < CURDATE()
     cursor.execute(query_for_team_id, (username,))
-    row = cursor.fetchone()
-    try:
-        team_id = row[0]
-    except:
-        team_id = None
+    team_data = cursor.fetchone()
+
+    print(team_data)
+    team_id, contract_start, contract_finish = int(team_data[0]), team_data[1], team_data[2]
     cursor.close()
 
     # get existing stadium names and countries
@@ -297,6 +301,22 @@ def coach_dashboard(request):
         jury_name = jury_name_surname.split()[0]
         jury_surname = jury_name_surname.split()[1]
 
+        # Extract day, month, and year from the date string
+        year, month, day = date.split('-')
+        # Reformat the date string as DD.MM.YYYY
+        formatted_date = f"{day}.{month}.{year}"
+
+        # Check if the date is within the contract period
+        formatted_date_c = convert_date(formatted_date)
+        contract_start_c = convert_date(contract_start)
+        contract_finish_c = convert_date(contract_finish)
+
+        #compare date with contract_start and contract_finish
+        if not (contract_start_c < formatted_date_c and formatted_date_c < contract_finish_c):
+            error_message = "The date of the match is not within the contract period."
+            return render(request, 'coach_dashboard.html', {'username': username, 'team_id': team_id, 'stadiums': stadiums, 'player_positions': player_positions, 'jury_names_surnames': jury_names_surnames_list, 'error_message_dp': error_message})
+
+
         cursor = mydb.cursor()
 
         # first get stadium id and country from stadium name
@@ -329,11 +349,6 @@ def coach_dashboard(request):
         cursor.execute(query_jury_username, (jury_name, jury_surname))
         jury_username = cursor.fetchone()[0]
         cursor.close()
-
-        # Extract day, month, and year from the date string
-        year, month, day = date.split('-')
-        # Reformat the date string as DD.MM.YYYY
-        formatted_date = f"{day}.{month}.{year}"
 
         # Insert the new match session into the database
         query_add_match_session = "INSERT INTO matchsession (session_ID, team_ID, stadium_ID, stadium_name, stadium_country, time_slot, date, assigned_jury_username, rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NULL)"
